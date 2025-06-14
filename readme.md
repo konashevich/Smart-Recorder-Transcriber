@@ -24,17 +24,6 @@ Follow these steps to run the application from the source code.
 * Python 3.7 or newer. You can download it from [python.org](https://www.python.org/).  
 * A working microphone.
 
-### **2\. Create Project Files**
-
-1. Create a folder for the project (e.g., SmartRecorder).  
-2. Save the main application code as transcriber.py inside this folder.  
-3. Create a file named requirements.txt in the same folder and add the following lines:  
-   SpeechRecognition  
-   pyaudio  
-   google-generativeai  
-   pyperclip  
-   requests  
-   ttkbootstrap
 
 ### **3\. Install Dependencies**
 
@@ -73,6 +62,6 @@ You can package the application into a single .exe file that can be run on any W
   * Choose between "Gemini" and "Local AI".  
   * Set the URL for your local model if you are not using the default.  
   * Select a "Light" or "Dark" theme.  
-* **Listen**: Click and hold the **🔴 Listen** button. The transcribed text will be inserted at your current cursor position in the "Raw Transcription" window. If you have text selected, it will be replaced.  
+* **Listen**: Click and hold the **⏺️ Listen** button. The transcribed text will be inserted at your current cursor position in the "Raw Transcription" window. If you have text selected, it will be replaced.  
 * **Polish**: Select text in the "Raw Transcription" window or leave it unselected to polish the entire content. Click **✨ Polish**, and the result will appear in the "Polished Text" window.  
 * **Save/Open**: Use the options in the File menu to save your work or open a past session.

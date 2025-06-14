@@ -25,18 +25,23 @@ class SpeechToTextApp:
         self.api_key = ""
         self.ai_service = tk.StringVar(value="Gemini")
         self.local_model_url = "http://localhost:1234/v1/chat/completions"
+        self.default_prompt = "You are a helpful assistant that polishes text. Return only the polished text without any comments or preamble."
+        self.system_prompt = tk.StringVar(value=self.default_prompt)
         
         self.style = self.root.style 
 
         self.create_widgets()
         self.create_menu()
-        self.load_settings()
-
+        
         self.recognizer = sr.Recognizer()
+        self.recognizer.energy_threshold = 4000
+        self.recognizer.dynamic_energy_threshold = True
+        
+        self.audio_data_chunks = []
         self.is_recording = False
         self.stop_listening = None
-        self.audio_data = []
         
+        self.load_settings()
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_widgets(self):
@@ -52,7 +57,7 @@ class SpeechToTextApp:
         raw_text_label = ttk.Label(raw_text_frame, text="Raw Transcription")
         raw_text_label.pack(pady=(0, 5))
 
-        self.raw_text_area = scrolledtext.ScrolledText(raw_text_frame, wrap=tk.WORD, height=15, width=45, font=("Arial", 10))
+        self.raw_text_area = scrolledtext.ScrolledText(raw_text_frame, wrap=tk.WORD, height=15, width=45, font=("Arial", 10), blockcursor=True)
         self.raw_text_area.pack(fill=BOTH, expand=YES)
 
         raw_buttons_frame = ttk.Frame(raw_text_frame)
@@ -70,7 +75,7 @@ class SpeechToTextApp:
         polished_text_label = ttk.Label(polished_text_frame, text="Polished Text")
         polished_text_label.pack(pady=(0, 5))
 
-        self.polished_text_area = scrolledtext.ScrolledText(polished_text_frame, wrap=tk.WORD, height=15, width=45, font=("Arial", 10))
+        self.polished_text_area = scrolledtext.ScrolledText(polished_text_frame, wrap=tk.WORD, height=15, width=45, font=("Arial", 10), blockcursor=True)
         self.polished_text_area.pack(fill=BOTH, expand=YES)
         
         polished_buttons_frame = ttk.Frame(polished_text_frame)
@@ -85,16 +90,18 @@ class SpeechToTextApp:
         main_button_frame = ttk.Frame(main_container)
         main_button_frame.pack(pady=5, fill=X, expand=NO)
 
-        self.record_button = ttk.Button(main_button_frame, text="🔴 Listen", bootstyle="danger-outline")
+        self.record_button = ttk.Button(main_button_frame, text="🔴 Listen", bootstyle="outline-danger")
         self.record_button.pack(side=LEFT, padx=5)
         self.record_button.bind("<ButtonPress-1>", self.start_recording)
         self.record_button.bind("<ButtonRelease-1>", self.stop_recording)
         
-        self.polish_button = ttk.Button(main_button_frame, text="✨ Polish", command=self.polish_text, bootstyle="success")
+        self.polish_button = ttk.Button(main_button_frame, text="✨ Polish", bootstyle="outline-primary")
         self.polish_button.pack(side=LEFT, padx=5)
+        self.polish_button.config(command=self.polish_text)
         
-        self.delete_all_button = ttk.Button(main_button_frame, text="🗑️ Del All", command=self.delete_all_text, bootstyle="danger")
+        self.delete_all_button = ttk.Button(main_button_frame, text="🗑️ Del All", bootstyle="outline-danger")
         self.delete_all_button.pack(side=RIGHT, padx=5)
+        self.delete_all_button.config(command=self.delete_all_text)
         
     def create_menu(self):
         self.menu_bar = Menu(self.root)
@@ -117,13 +124,44 @@ class SpeechToTextApp:
         self.theme_menu.add_command(label="Dark (Darkly)", command=lambda: self.on_theme_change("darkly"))
 
         self.settings_menu.add_separator()
+        self.settings_menu.add_command(label="Edit AI Prompt...", command=self.edit_prompt_window)
         self.settings_menu.add_command(label="Set Gemini API Key", command=self.set_api_key)
         self.ai_service_menu = Menu(self.settings_menu, tearoff=0)
         self.settings_menu.add_cascade(label="AI Service", menu=self.ai_service_menu)
         self.ai_service_menu.add_radiobutton(label="Gemini", variable=self.ai_service, value="Gemini", command=self.save_settings)
         self.ai_service_menu.add_radiobutton(label="Local AI", variable=self.ai_service, value="Local", command=self.save_settings)
         self.settings_menu.add_command(label="Set Local AI URL", command=self.set_local_model_url)
-    
+
+    def edit_prompt_window(self):
+        prompt_window = ttk.Toplevel(self.root)
+        prompt_window.title("Edit AI System Prompt")
+        prompt_window.geometry("500x300")
+        
+        prompt_label = ttk.Label(prompt_window, text="Enter the system prompt for the AI:", padding=10)
+        prompt_label.pack()
+
+        prompt_text = scrolledtext.ScrolledText(prompt_window, wrap=tk.WORD, height=8, width=60)
+        prompt_text.pack(pady=5, padx=10, fill=BOTH, expand=YES)
+        prompt_text.insert(tk.END, self.system_prompt.get())
+
+        button_frame = ttk.Frame(prompt_window)
+        button_frame.pack(pady=10)
+
+        def save_and_close():
+            self.system_prompt.set(prompt_text.get(1.0, tk.END).strip())
+            self.save_settings()
+            prompt_window.destroy()
+        
+        def reset_prompt():
+            prompt_text.delete(1.0, tk.END)
+            prompt_text.insert(1.0, self.default_prompt)
+
+        save_button = ttk.Button(button_frame, text="Save", command=save_and_close, bootstyle="success")
+        save_button.pack(side=LEFT, padx=10)
+        
+        reset_button = ttk.Button(button_frame, text="Reset", command=reset_prompt, bootstyle="secondary")
+        reset_button.pack(side=LEFT, padx=10)
+
     def apply_theme_to_scrolledtext(self):
         theme_name = self.style.theme.name
         if theme_name in ['cyborg', 'darkly', 'superhero', 'solar']:
@@ -142,18 +180,15 @@ class SpeechToTextApp:
         self.save_settings()
 
     def copy_raw_text(self):
-        """Copies text from the raw transcription window without a popup."""
         pyperclip.copy(self.raw_text_area.get(1.0, tk.END))
 
     def copy_polished_text(self):
         pyperclip.copy(self.polished_text_area.get(1.0, tk.END))
 
     def delete_raw_text(self):
-        """Deletes all text in the raw transcription window without confirmation."""
         self.raw_text_area.delete(1.0, tk.END)
 
     def delete_polished_text(self):
-        """Deletes all text in the polished text window without confirmation."""
         self.polished_text_area.delete(1.0, tk.END)
 
     def delete_all_text(self):
@@ -211,6 +246,7 @@ class SpeechToTextApp:
                     self.api_key = settings.get("api_key", "")
                     self.ai_service.set(settings.get("ai_service", "Gemini"))
                     self.local_model_url = settings.get("local_model_url", "http://localhost:1234/v1/chat/completions")
+                    self.system_prompt.set(settings.get("system_prompt", self.default_prompt))
                     
                     saved_theme = settings.get("theme", "litera")
                     if saved_theme in valid_themes:
@@ -221,15 +257,15 @@ class SpeechToTextApp:
                 if self.api_key: genai.configure(api_key=self.api_key)
             except (json.JSONDecodeError, IOError): pass
         
-        self.style.theme_use(theme_to_load)
-        self.apply_theme_to_scrolledtext()
+        self.on_theme_change(theme_to_load)
     
     def save_settings(self):
         settings = {
             "api_key": self.api_key,
             "ai_service": self.ai_service.get(),
             "local_model_url": self.local_model_url,
-            "theme": self.style.theme.name
+            "theme": self.style.theme.name,
+            "system_prompt": self.system_prompt.get()
         }
         try:
             with open(self.settings_file, 'w') as f: json.dump(settings, f, indent=4)
@@ -257,40 +293,66 @@ class SpeechToTextApp:
             self.save_settings()
 
     def start_recording(self, event):
-        if self.is_recording: return
+        if self.is_recording:
+            return
         self.is_recording = True
-        self.audio_data = []
         self.record_button.config(bootstyle="danger", text="Listening...")
-        try:
-            self.stop_listening = self.recognizer.listen_in_background(sr.Microphone(), lambda r,a: self.audio_data.append(a), phrase_time_limit=10)
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not start microphone: {e}")
-            self.is_recording = False
-            self.record_button.config(bootstyle="danger-outline", text="🔴 Listen")
+        
+        # Start the recording process in a separate thread
+        threading.Thread(target=self.record_audio_thread, daemon=True).start()
 
     def stop_recording(self, event):
-        if not self.is_recording: return
-        self.record_button.config(text="Transcribing...")
-        if self.stop_listening: self.stop_listening(wait_for_stop=False)
-        self.is_recording = False
-        if self.audio_data:
-            threading.Thread(target=self.process_recorded_audio).start()
-        else:
-            self.record_button.config(bootstyle="danger-outline", text="🔴 Listen")
+        # This now simply signals the recording thread to stop.
+        # The thread itself handles the rest.
+        if self.is_recording:
+            self.is_recording = False 
+            self.record_button.config(text="Transcribing...")
 
-    def process_recorded_audio(self):
+    def record_audio_thread(self):
+        """Dedicated thread for capturing audio to prevent GUI freezing."""
+        with sr.Microphone() as source:
+            self.recognizer.adjust_for_ambient_noise(source, duration=0.2)
+            audio_data = []
+
+            while self.is_recording:
+                try:
+                    # Record small chunks of audio in a non-blocking way
+                    # by using a short timeout.
+                    audio_chunk = self.recognizer.listen(source, timeout=0.1, phrase_time_limit=5)
+                    audio_data.append(audio_chunk)
+                except sr.WaitTimeoutError:
+                    # This is expected if there's no speech, just continue the loop
+                    continue
+            
+        if audio_data:
+            # Once recording stops, process the accumulated audio
+            self.root.after(0, self.process_recorded_audio, audio_data)
+        else:
+            # If no audio was captured, just reset the button
+            self.root.after(0, lambda: self.record_button.config(bootstyle="outline-danger", text="🔴 Listen"))
+
+    def process_recorded_audio(self, audio_chunks):
+        """Processes the captured audio data."""
         try:
-            if not self.audio_data: return
-            full_audio = sr.AudioData(b"".join([a.get_raw_data() for a in self.audio_data]), self.audio_data[0].sample_rate, self.audio_data[0].sample_width)
+            # Combine the audio data chunks into a single AudioData object
+            raw_data = b"".join([chunk.get_raw_data() for chunk in audio_chunks])
+            sample_rate = audio_chunks[0].sample_rate
+            sample_width = audio_chunks[0].sample_width
+            full_audio = sr.AudioData(raw_data, sample_rate, sample_width)
+            
+            # Perform recognition on the audio data
             text = self.recognizer.recognize_google(full_audio)
-            if text: self.root.after(0, self.insert_transcribed_text, text)
+            self.insert_transcribed_text(text)
         except sr.UnknownValueError:
-            self.root.after(0, lambda: messagebox.showwarning("Speech Recognition", "Could not understand audio"))
+            messagebox.showwarning("Speech Recognition", "Could not understand audio")
         except sr.RequestError as e:
-            self.root.after(0, lambda: messagebox.showerror("Speech Recognition", f"Could not request results; {e}"))
-        except IndexError: pass
+            messagebox.showerror("Speech Recognition", f"Could not request results from Google Speech Recognition service; {e}")
+        except IndexError:
+             # This can happen if audio_chunks is empty but the thread still runs
+            pass
         finally:
-            self.root.after(0, lambda: self.record_button.config(bootstyle="danger-outline", text="🔴 Listen"))
+            # Reset the button state
+            self.record_button.config(bootstyle="outline-danger", text="🔴 Listen")
 
     def insert_transcribed_text(self, text):
         try:
@@ -311,7 +373,7 @@ class SpeechToTextApp:
             messagebox.showinfo("Polish Text", "Nothing to polish.")
             return
 
-        threading.Thread(target=self.get_polished_text, args=(text_to_polish,)).start()
+        threading.Thread(target=self.get_polished_text, args=(text_to_polish,), daemon=True).start()
 
     def get_polished_text(self, text):
         try:
@@ -319,12 +381,13 @@ class SpeechToTextApp:
                 if not self.api_key:
                     self.root.after(0, lambda: messagebox.showerror("Error", "Please set your Gemini API key in Settings."))
                     return
+                prompt = f"{self.system_prompt.get()}\n\n{text}"
                 model = genai.GenerativeModel('gemini-1.5-flash')
-                response = model.generate_content(f"Polish the following text, return only the polished text without any comments or preamble:\n\n{text}")
+                response = model.generate_content(prompt)
                 polished_text = response.text
             else: 
                 headers = {"Content-Type": "application/json"}
-                data = { "model": "local-model", "messages": [{"role": "system", "content": "You are a helpful assistant that polishes text."}, {"role": "user", "content": f"Polish the following text, return only the polished text without any comments or preamble:\n\n{text}"}], "temperature": 0.7 }
+                data = { "model": "local-model", "messages": [{"role": "system", "content": self.system_prompt.get()}, {"role": "user", "content": text}], "temperature": 0.7 }
                 response = requests.post(self.local_model_url, headers=headers, data=json.dumps(data))
                 response.raise_for_status()
                 polished_text = response.json()['choices'][0]['message']['content']
@@ -337,17 +400,14 @@ class SpeechToTextApp:
     def display_polished_text(self, text):
         """Inserts polished text at the cursor, replacing selected text if any."""
         try:
-            # If text is selected, delete it first.
             start = self.polished_text_area.index("sel.first")
             end = self.polished_text_area.index("sel.last")
             self.polished_text_area.delete(start, end)
         except tk.TclError:
-            # No selection, do nothing.
             pass
         
-        # Insert the polished text at the cursor position
         self.polished_text_area.insert(tk.INSERT, text)
-        pyperclip.copy(text) # Copy only the newly polished text
+        pyperclip.copy(text)
 
 if __name__ == "__main__":
     root = ttk.Window(themename="litera")
