@@ -18,6 +18,7 @@ THEMES = {
         "text_fg": "#000000",
         "button_bg": "#E1E1E1",
         "button_fg": "#000000",
+        "active_bg": "#D4D4D4",
         "trough_color": "#F0F0F0"
     },
     "dark": {
@@ -27,6 +28,7 @@ THEMES = {
         "text_fg": "#FFFFFF",
         "button_bg": "#505050",
         "button_fg": "#FFFFFF",
+        "active_bg": "#6A6A6A",
         "trough_color": "#2E2E2E"
     }
 }
@@ -37,7 +39,6 @@ class SpeechToTextApp:
         self.root.title("Speech to Text Notepad")
         self.root.geometry("900x600")
 
-        # Style object for ttk widgets
         self.style = ttk.Style(self.root)
 
         self.settings_file = "settings.json"
@@ -55,7 +56,6 @@ class SpeechToTextApp:
         self.create_menu()
         self.load_settings()
 
-        # Recording state and resources
         self.recognizer = sr.Recognizer()
         self.is_recording = False
         self.stop_listening = None
@@ -65,25 +65,33 @@ class SpeechToTextApp:
 
     def apply_theme(self):
         theme_name = self.theme_var.get()
-        theme_colors = THEMES.get(theme_name, THEMES["light"])
+        colors = THEMES.get(theme_name, THEMES["light"])
             
-        self.root.config(bg=theme_colors["bg"])
+        self.root.config(bg=colors["bg"])
         
-        # Configure ttk style for scrollbars
+        self.style.theme_use('default')
         self.style.configure("TScrollbar",
             gripcount=0,
-            background=theme_colors["button_bg"],
-            darkcolor=theme_colors["bg"],
-            lightcolor=theme_colors["bg"],
-            troughcolor=theme_colors["trough_color"],
-            bordercolor=theme_colors["bg"],
-            arrowcolor=theme_colors["fg"]
+            background=colors["button_bg"],
+            darkcolor=colors["trough_color"],
+            lightcolor=colors["trough_color"],
+            troughcolor=colors["trough_color"],
+            bordercolor=colors["bg"],
+            arrowcolor=colors["fg"]
         )
-        self.style.map("TScrollbar", background=[('active', theme_colors["fg"])])
+        self.style.map("TScrollbar", background=[('active', colors["active_bg"])])
 
-        # Apply to all relevant widgets
+        # Explicitly configure menus
+        menus = [self.menu_bar, self.file_menu, self.settings_menu, self.theme_menu, self.ai_service_menu]
+        for menu in menus:
+            menu.config(bg=colors["bg"], fg=colors["fg"], 
+                        activebackground=colors["active_bg"], activeforeground=colors["fg"],
+                        bd=0)
+
+        # Configure all other widgets
         for widget in self.root.winfo_children():
-            self.configure_widget_theme(widget, theme_colors)
+            if widget.winfo_class() != 'Menu':
+                self.configure_widget_theme(widget, colors)
 
     def configure_widget_theme(self, widget, colors):
         widget_type = widget.winfo_class()
@@ -104,11 +112,12 @@ class SpeechToTextApp:
             widget.config(bg=colors["text_bg"], fg=colors["text_fg"], insertbackground=colors["fg"])
         
         elif widget_type in ("Button", "TButton"):
-             widget.config(bg=colors["button_bg"], fg=colors["fg"], activebackground=colors["fg"], activeforeground=colors["bg"])
+             widget.config(bg=colors["button_bg"], fg=colors["fg"], 
+                           activebackground=colors["active_bg"], activeforeground=colors["fg"],
+                           highlightthickness=0, borderwidth=1)
              
-        elif widget_type in ("Label", "TLabel", "Radiobutton", "TRadiobutton", "Menu"):
-            widget.config(bg=colors["bg"], fg=colors["fg"])
-
+        elif widget_type in ("Radiobutton", "TRadiobutton"):
+            widget.config(selectcolor=colors["bg"])
 
     def create_widgets(self):
         self.text_frame_container = tk.Frame(self.root)
@@ -153,7 +162,7 @@ class SpeechToTextApp:
         self.main_button_frame = tk.Frame(self.root)
         self.main_button_frame.pack(pady=5)
 
-        self.record_button = tk.Button(self.main_button_frame, text="🔴 Listen", font=("Arial", 10, "bold"))
+        self.record_button = tk.Button(self.main_button_frame, text="🔴 Listen", font=("Segoe UI Emoji", 10, "bold"))
         self.record_button.pack(side="left", padx=5)
         self.record_button.bind("<ButtonPress-1>", self.start_recording)
         self.record_button.bind("<ButtonRelease-1>", self.stop_recording)
@@ -168,31 +177,31 @@ class SpeechToTextApp:
         self.delete_all_button.pack(side="left", padx=5)
         
     def create_menu(self):
-        menu_bar = Menu(self.root)
-        self.root.config(menu=menu_bar)
+        self.menu_bar = Menu(self.root)
+        self.root.config(menu=self.menu_bar)
         
-        file_menu = Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="📂 Open...", command=self.open_file)
-        file_menu.add_command(label="💾 Save & New", command=self.save_and_new)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.on_closing)
+        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="📂 Open...", command=self.open_file)
+        self.file_menu.add_command(label="💾 Save & New", command=self.save_and_new)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.on_closing)
 
-        settings_menu = Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label="Settings", menu=settings_menu)
+        self.settings_menu = Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
         
-        theme_menu = Menu(settings_menu, tearoff=0)
-        settings_menu.add_cascade(label="Theme", menu=theme_menu)
-        theme_menu.add_radiobutton(label="Light", variable=self.theme_var, value="light", command=self.on_theme_change)
-        theme_menu.add_radiobutton(label="Dark", variable=self.theme_var, value="dark", command=self.on_theme_change)
+        self.theme_menu = Menu(self.settings_menu, tearoff=0)
+        self.settings_menu.add_cascade(label="Theme", menu=self.theme_menu)
+        self.theme_menu.add_radiobutton(label="Light", variable=self.theme_var, value="light", command=self.on_theme_change)
+        self.theme_menu.add_radiobutton(label="Dark", variable=self.theme_var, value="dark", command=self.on_theme_change)
 
-        settings_menu.add_separator()
-        settings_menu.add_command(label="Set Gemini API Key", command=self.set_api_key)
-        ai_service_menu = Menu(settings_menu, tearoff=0)
-        settings_menu.add_cascade(label="AI Service", menu=ai_service_menu)
-        ai_service_menu.add_radiobutton(label="Gemini", variable=self.ai_service, value="Gemini", command=self.save_settings)
-        ai_service_menu.add_radiobutton(label="Local AI", variable=self.ai_service, value="Local", command=self.save_settings)
-        settings_menu.add_command(label="Set Local AI URL", command=self.set_local_model_url)
+        self.settings_menu.add_separator()
+        self.settings_menu.add_command(label="Set Gemini API Key", command=self.set_api_key)
+        self.ai_service_menu = Menu(self.settings_menu, tearoff=0)
+        self.settings_menu.add_cascade(label="AI Service", menu=self.ai_service_menu)
+        self.ai_service_menu.add_radiobutton(label="Gemini", variable=self.ai_service, value="Gemini", command=self.save_settings)
+        self.ai_service_menu.add_radiobutton(label="Local AI", variable=self.ai_service, value="Local", command=self.save_settings)
+        self.settings_menu.add_command(label="Set Local AI URL", command=self.set_local_model_url)
     
     def on_theme_change(self):
         self.apply_theme()
