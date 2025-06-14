@@ -117,7 +117,11 @@ class SpeechToTextApp:
                            highlightthickness=0, borderwidth=1)
              
         elif widget_type in ("Radiobutton", "TRadiobutton"):
+            # This was causing the error, it's safer to only apply to Radiobuttons
             widget.config(selectcolor=colors["bg"])
+        elif widget_type == "Label":
+            widget.config(bg=colors["bg"], fg=colors["fg"])
+
 
     def create_widgets(self):
         self.text_frame_container = tk.Frame(self.root)

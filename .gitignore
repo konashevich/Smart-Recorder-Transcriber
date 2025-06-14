@@ -1,3 +1,31 @@
-/.venv
+# Python #
+###########
+# Byte-compiled / optimized / C extensions
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# PyInstaller #
+###############
+# PyInstaller-generated folders
+build/
+dist/
+
+# PyInstaller-generated spec file
+*.spec
+
+
+# Application-specific #
+########################
+# User settings file (contains sensitive API key)
 settings.json
-/records
+
+# Saved transcription sessions
+savings/
+/dist/savings
