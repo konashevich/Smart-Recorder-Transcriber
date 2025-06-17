@@ -35,6 +35,16 @@ class Communicate(QObject):
     error = Signal(str)
     polish_ready = Signal(str)
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
 # --- Modern Dark Theme Stylesheet (QSS) ---
 DARK_STYLESHEET = """
 QWidget {
@@ -151,7 +161,7 @@ class MainWindow(QMainWindow):
         # --- Set Window Icon ---
         # Make sure 'icon.ico' or 'icon.png' is in the same directory as your script,
         # or provide the full path to the icon file.
-        self.setWindowIcon(QIcon("icon.ico")) # Or QIcon("icon.png")
+        self.setWindowIcon(QIcon(resource_path("icon.ico"))) # Or resource_path("icon.png")
 
         self.settings_file = "settings.json"
         self.savings_dir = "savings"

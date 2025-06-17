@@ -42,16 +42,18 @@ You can package the application into a single .exe file that can be run on any W
 
 1.  Install PyInstaller:  
     If you haven't already, install PyInstaller:  
-    pip install pyinstaller
+    `pip install pyinstaller`
     
 2.  Build the Executable:  
     In your terminal, from the project directory, run the following command. It is recommended to run PyInstaller as a Python module to avoid potential path issues.  
     `python -m PyInstaller --onefile --windowed --name="Smart AI Recorder Transcriber" --icon="icon.ico" transcriber.py`
-    
+	or (if you want to create with embedded icon image):
+`python -m PyInstaller "Smart AI Recorder Transcriber.spec"`
+	
     - \--onefile: Bundles everything into a single .exe file.
     - \--windowed: Prevents a console window from appearing when the application runs.
     - \--name: Sets the name of the final executable.
-3.  Find Your Application:  
+4.  Find Your Application:  
     Once the process is complete, you will find Smart AI Recorder Transcriber.exe inside a new folder named dist. You can share this file with others.
     
 
@@ -61,7 +63,7 @@ You can package the application into a single .exe file that can be run on any W
     - Set your Gemini API key.
     - Choose between "Gemini" and "Local AI".
     - Set the URL for your local model if you are not using the default.
-    - Select a "Light" or "Dark" theme.
+    - It follows OS Theme (Light/Dark) automatically.
 - **Listen**: Click and hold the **⏺️ Listen** button. The transcribed text will be inserted at your current cursor position in the "Raw Transcription" window. If you have text selected, it will be replaced.
 - **Polish**: Select text in the "Raw Transcription" window or leave it unselected to polish the entire content. Click **✨ Polish**, and the result will appear in the "Polished Text" window.
 - **Save/Open**: Use the options in the File menu to save your work or open a past session.
