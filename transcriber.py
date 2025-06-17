@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QMessageBox, QInputDialog, QLabel
 )
 from PySide6.QtCore import Qt, Signal, QObject
-from PySide6.QtGui import QAction, QFont, QActionGroup
+from PySide6.QtGui import QAction, QFont, QActionGroup, QIcon
 
 # --- Core Logic Imports ---
 import speech_recognition as sr
@@ -147,6 +147,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Smart AI Recorder Transcriber")
         self.setGeometry(100, 100, 900, 600)
+
+        # --- Set Window Icon ---
+        # Make sure 'icon.ico' or 'icon.png' is in the same directory as your script,
+        # or provide the full path to the icon file.
+        self.setWindowIcon(QIcon("icon.ico")) # Or QIcon("icon.png")
 
         self.settings_file = "settings.json"
         self.savings_dir = "savings"
