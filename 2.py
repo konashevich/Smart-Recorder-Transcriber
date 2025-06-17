@@ -25,12 +25,18 @@ DEFAULT_SETTINGS = {
             "foreground": "#000000",
             "text_background": "#ffffff",
             "text_foreground": "#000000",
-            "button_secondary_background": "#e1e1e1",
             "button_secondary_foreground": "#000000",
-            "button_outline_danger": "#dc3545",
-            "button_outline_primary": "#0d6efd",
-            "button_hover_danger": "#dc3545",
-            "button_hover_primary": "#0d6efd",
+            # Light theme outline buttons
+            "button_outline_danger_fg": "#dc3545",
+            "button_outline_danger_border": "#dc3545",
+            "button_outline_danger_hover_bg": "#c82333", # Darker red for hover background
+            "button_outline_danger_hover_fg": "#ffffff", # White text on hover
+            "button_outline_danger_hover_border": "#c82333", # Darker red for hover border
+            "button_outline_primary_fg": "#0d6efd",
+            "button_outline_primary_border": "#0d6efd",
+            "button_outline_primary_hover_bg": "#0056b3", # Darker blue for hover background
+            "button_outline_primary_hover_fg": "#ffffff", # White text on hover
+            "button_outline_primary_hover_border": "#0056b3", # Darker blue for hover border
             "ghost_cursor_color": "#808080"
         },
         "dark": {
@@ -38,12 +44,18 @@ DEFAULT_SETTINGS = {
             "foreground": "#ffffff",
             "text_background": "#3c3c3c",
             "text_foreground": "#ffffff",
-            "button_secondary_background": "#505050",
             "button_secondary_foreground": "#ffffff",
-            "button_outline_danger": "#ff6b6b",
-            "button_outline_primary": "#58a6ff",
-            "button_hover_danger": "#ff6b6b",
-            "button_hover_primary": "#58a6ff",
+            # Dark theme outline buttons (using debug green for danger)
+            "button_outline_danger_fg": "#00ff00",       # Green text/icon
+            "button_outline_danger_border": "#00ff00",   # Green border
+            "button_outline_danger_hover_bg": "#008000", # Darker green for hover background
+            "button_outline_danger_hover_fg": "#ffffff", # White text on hover
+            "button_outline_danger_hover_border": "#008000", # Darker green for hover border
+            "button_outline_primary_fg": "#58a6ff",      # Light blue text/icon
+            "button_outline_primary_border": "#58a6ff",  # Light blue border
+            "button_outline_primary_hover_bg": "#0056b3", # Darker blue for hover background
+            "button_outline_primary_hover_fg": "#ffffff", # White text on hover
+            "button_outline_primary_hover_border": "#0056b3", # Darker blue for hover border
             "ghost_cursor_color": "#808080"
         }
     }
@@ -104,14 +116,24 @@ class SpeechToTextApp:
         self.raw_text_area.bind("<FocusOut>", self.handle_focus_out)
         self.raw_text_area.bind("<FocusIn>", self.handle_focus_in)
 
-
         self.raw_buttons_frame = ttk.Frame(self.raw_text_frame)
         self.raw_buttons_frame.pack(pady=5)
         
-        self.copy_raw_button = ttk.Button(self.raw_buttons_frame, text="📋 Copy", command=self.copy_raw_text, bootstyle="secondary")
+        # Listen Button (Moved here)
+        self.record_button = ttk.Button(self.raw_buttons_frame, text="🔴 Listen", bootstyle="outline-danger")
+        self.record_button.pack(side=LEFT, padx=5)
+        self.record_button.bind("<ButtonPress-1>", self.start_recording)
+        self.record_button.bind("<ButtonRelease-1>", self.stop_recording)
+
+        # Polish Button (Moved to Raw Transcription)
+        self.polish_button_raw = ttk.Button(self.raw_buttons_frame, text="✨ Polish", bootstyle="outline-primary")
+        self.polish_button_raw.pack(side=LEFT, padx=5)
+        self.polish_button_raw.config(command=self.polish_text)
+        
+        self.copy_raw_button = ttk.Button(self.raw_buttons_frame, text="📋", command=self.copy_raw_text, bootstyle="secondary", width=2)
         self.copy_raw_button.pack(side=LEFT, padx=5)
         
-        self.delete_raw_button = ttk.Button(self.raw_buttons_frame, text="🗑️ Delete", command=self.delete_raw_text, bootstyle="secondary")
+        self.delete_raw_button = ttk.Button(self.raw_buttons_frame, text="🗑️", command=self.delete_raw_text, bootstyle="secondary", width=2)
         self.delete_raw_button.pack(side=LEFT, padx=5)
 
         self.polished_text_frame = ttk.Frame(self.paned_window, padding=5)
@@ -129,27 +151,20 @@ class SpeechToTextApp:
         self.polished_buttons_frame = ttk.Frame(self.polished_text_frame)
         self.polished_buttons_frame.pack(pady=5)
 
-        self.copy_polish_button = ttk.Button(self.polished_buttons_frame, text="📋 Copy", command=self.copy_polished_text, bootstyle="secondary")
+        self.copy_polish_button = ttk.Button(self.polished_buttons_frame, text="📋", command=self.copy_polished_text, bootstyle="secondary", width=2)
         self.copy_polish_button.pack(side=LEFT, padx=5)
 
-        self.delete_polish_button = ttk.Button(self.polished_buttons_frame, text="🗑️ Delete", command=self.delete_polished_text, bootstyle="secondary")
+        self.delete_polish_button = ttk.Button(self.polished_buttons_frame, text="🗑️", command=self.delete_polished_text, bootstyle="secondary", width=2)
         self.delete_polish_button.pack(side=LEFT, padx=5)
 
-        self.main_button_frame = ttk.Frame(self.main_container)
-        self.main_button_frame.pack(pady=5, fill=X, expand=NO)
-
-        self.record_button = ttk.Button(self.main_button_frame, text="🔴 Listen", bootstyle="outline-danger")
-        self.record_button.pack(side=LEFT, padx=5)
-        self.record_button.bind("<ButtonPress-1>", self.start_recording)
-        self.record_button.bind("<ButtonRelease-1>", self.stop_recording)
-        
-        self.polish_button = ttk.Button(self.main_button_frame, text="✨ Polish", bootstyle="outline-primary")
-        self.polish_button.pack(side=LEFT, padx=5)
-        self.polish_button.config(command=self.polish_text)
-        
-        self.delete_all_button = ttk.Button(self.main_button_frame, text="🗑️ Del All", bootstyle="outline-danger")
-        self.delete_all_button.pack(side=RIGHT, padx=5)
+        # Del All Button (Moved to Polished Text)
+        self.delete_all_button = ttk.Button(self.polished_buttons_frame, text="🗑️ All", bootstyle="outline-danger") # Kept "All" for clarity with icon
+        self.delete_all_button.pack(side=LEFT, padx=5)
         self.delete_all_button.config(command=self.delete_all_text)
+        
+        # --- Main Button Frame (now empty, can be removed or repurposed) ---
+        # self.main_button_frame = ttk.Frame(self.main_container)
+        # self.main_button_frame.pack(pady=5, fill=X, expand=NO)
         
     def create_menu(self):
         self.menu_bar = Menu(self.root)
@@ -236,11 +251,39 @@ class SpeechToTextApp:
                     selectforeground=self.style.colors.selectfg
                 )
 
-            self.style.configure('outline-danger.TButton', foreground=colors["button_outline_danger"])
-            self.style.map('outline-danger.TButton', background=[('hover', colors["button_hover_danger"])])
+            # --- DEBUG PRINTS ---
+            print(f"DEBUG: Theme changed to: {theme_name}")
+            print(f"DEBUG: Colors for outline-danger_fg: {colors.get('button_outline_danger_fg')}")
+            print(f"DEBUG: Colors for outline-danger_border: {colors.get('button_outline_danger_border')}")
+            # print(f"DEBUG: Full 'colors' dictionary for theme '{theme_name}': {colors}") # Optional: for more detail
 
-            self.style.configure('outline-primary.TButton', foreground=colors["button_outline_primary"])
-            self.style.map('outline-primary.TButton', background=[('hover', colors["button_hover_primary"])])
+            # Configure outline-danger buttons
+            self.style.configure('outline-danger.TButton', 
+                                 foreground=colors["button_outline_danger_fg"], 
+                                 bordercolor=colors["button_outline_danger_border"])
+            self.style.map('outline-danger.TButton', 
+                           foreground=[('hover', colors["button_outline_danger_hover_fg"])],
+                           background=[('hover', colors["button_outline_danger_hover_bg"])],
+                           bordercolor=[('hover', colors["button_outline_danger_hover_border"])])
+
+            # Configure outline-primary buttons
+            self.style.configure('outline-primary.TButton', 
+                                 foreground=colors["button_outline_primary_fg"], 
+                                 bordercolor=colors["button_outline_primary_border"])
+            self.style.map('outline-primary.TButton', 
+                           foreground=[('hover', colors["button_outline_primary_hover_fg"])],
+                           background=[('hover', colors["button_outline_primary_hover_bg"])],
+                           bordercolor=[('hover', colors["button_outline_primary_hover_border"])])
+
+            # Ensure secondary buttons (Copy, Delete icons) use the theme's foreground for their text/icon
+            if "button_secondary_foreground" in colors:
+                self.style.configure('secondary.TButton', foreground=colors["button_secondary_foreground"])
+            
+            # ttkbootstrap themes might not have explicit 'button_secondary_background'
+            # but 'secondary.TButton' background is usually set by the theme itself.
+            # If you need to override it:
+            # if "button_secondary_background" in colors:
+            #    self.style.configure('secondary.TButton', background=colors["button_secondary_background"])
             
             # Recreate ghost cursors with the new theme color
             self._create_ghost_cursors()
