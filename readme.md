@@ -21,7 +21,7 @@ Follow these steps to run the application from the source code.
 
 ### **1\. Prerequisites**
 
-* Python 3.7 or newer. You can download it from [python.org](https://www.python.org/).  
+* It is tested on Python 3.13.3
 * A working microphone.
 
 
