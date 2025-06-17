@@ -4,4 +4,4 @@ google-generativeai
 pyperclip 
 requests
 pyinstaller
-ttkbootstrap
+PySide6
