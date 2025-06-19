@@ -1,10 +1,22 @@
-# **Smart AI Recorder Transcriber**
+# **LISTEN & POLISH -  AI Transcriber**
 
-A desktop application for Windows that allows you to transcribe your speech in real-time, polish the text using AI, and manage your transcriptions with a simple and intuitive interface.
+A desktop application for Windows (Mac and Linux - use Python script or build your own distributive) that allows you to transcribe your speech in real-time, polish the text using AI, and manage your transcriptions with a simple and intuitive interface.
 
-(A representative screenshot of the application in dark mode)
+==**Free API key from Google AI GEMINI in 2025:**== [How To Get Your FREE Google Gemini API Key (2025)](https://youtu.be/6BRyynZkvf0?si=1DJ6NHVoif5fRpCr)
 
-## **Features**
+How to use - see the screenshot:
+
+<img src="listen-and-polish.png" width="714" height="389">
+
+How to get key (I still highly recommend to watch that youtube video above):
+- Login in https://aistudio.google.com/
+- Click GET API Key in the top right corner
+- Go through the steps (it is easy) copy the key and paste in the app.
+- How much will you pay - unless for any reason you don't get FREE API KEY from Google GEMINI, you it is still cheap as dirt.
+- TRANSCRIPTION IS ALWAYS FOR FREE! You don't need a key for it, you need key only for Polishing the text.
+- You can install LM Studio or other local AI programs and if you machine is powerful enough you don't need API key at all.
+
+## **Tech stuff (don't read it you are not a nerd)**
 
 - **Interactive Transcription**: Use your microphone to transcribe speech directly into the editor at the cursor's position. Select text to replace it with a new transcription.
 - **AI-Powered Polishing**: Polish the entire text or just a selection using an AI (Gemini or a local model) to correct grammar, improve phrasing, and fix typos.
@@ -46,24 +58,12 @@ You can package the application into a single .exe file that can be run on any W
     
 2.  Build the Executable:  
     In your terminal, from the project directory, run the following command. It is recommended to run PyInstaller as a Python module to avoid potential path issues.  
-    `python -m PyInstaller --onefile --windowed --name="Smart AI Recorder Transcriber" --icon="icon.ico" transcriber.py`
-	or (if you want to create with embedded icon image):
-`python -m PyInstaller "Smart AI Recorder Transcriber.spec"`
-	
+    `python -m PyInstaller --onefile --windowed --name="Smart AI Recorder Transcriber" --icon="icon.ico" transcriber.py`  
+    or (if you want to create with embedded icon image):  
+    `python -m PyInstaller "Smart AI Recorder Transcriber.spec"`
+    
     - \--onefile: Bundles everything into a single .exe file.
     - \--windowed: Prevents a console window from appearing when the application runs.
     - \--name: Sets the name of the final executable.
-4.  Find Your Application:  
+3.  Find Your Application:  
     Once the process is complete, you will find Smart AI Recorder Transcriber.exe inside a new folder named dist. You can share this file with others.
-    
-
-## **How to Use**
-
-- **Settings**: Before using the AI features, go to Settings in the menu to:
-    - Set your Gemini API key.
-    - Choose between "Gemini" and "Local AI".
-    - Set the URL for your local model if you are not using the default.
-    - It follows OS Theme (Light/Dark) automatically.
-- **Listen**: Click and hold the **⏺️ Listen** button. The transcribed text will be inserted at your current cursor position in the "Raw Transcription" window. If you have text selected, it will be replaced.
-- **Polish**: Select text in the "Raw Transcription" window or leave it unselected to polish the entire content. Click **✨ Polish**, and the result will appear in the "Polished Text" window.
-- **Save/Open**: Use the options in the File menu to save your work or open a past session.

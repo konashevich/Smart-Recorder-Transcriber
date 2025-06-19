@@ -24,7 +24,7 @@ exe = EXE(
     a.binaries,
     a.datas, # This now includes your icon for runtime access
     [],
-    name='Smart AI Recorder Transcriber',
+    name='Listen & Polish - AI Transcriber',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
