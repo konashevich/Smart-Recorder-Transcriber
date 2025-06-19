@@ -60,7 +60,7 @@ You can package the application into a single .exe file that can be run on any W
     In your terminal, from the project directory, run the following command. It is recommended to run PyInstaller as a Python module to avoid potential path issues.  
     `python -m PyInstaller --onefile --windowed --name="Smart AI Recorder Transcriber" --icon="icon.ico" transcriber.py`  
     or (if you want to create with embedded icon image):  
-    `python -m PyInstaller "Smart AI Recorder Transcriber.spec"`
+    `python -m PyInstaller "Listen and Polish - AI Transcriber.spec"`
     
     - \--onefile: Bundles everything into a single .exe file.
     - \--windowed: Prevents a console window from appearing when the application runs.
