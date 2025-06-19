@@ -459,6 +459,12 @@ class MainWindow(QMainWindow):
         settings_menu.addAction("Set Gemini API Key...", self.set_api_key)
         settings_menu.addAction("Set Local AI URL...", self.set_local_model_url)
         
+        # Help Menu
+        help_menu = menu_bar.addMenu("Help")
+        about_action = QAction("About", self)
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(about_action)
+        
     def set_ai_service(self, service_name):
         self.settings["ai_service"] = service_name
         self.save_settings()
@@ -943,6 +949,16 @@ class MainWindow(QMainWindow):
             self.stop_recording()
         else:
             self.start_recording()
+
+    def show_about_dialog(self):
+        about_text = (
+            f"<p><b>Smart AI Recorder Transcriber</b></p>"
+            f"<p>Version: 1.05</p>"
+            f"<p>Author: Oleksii Konashevych</p>"
+            f"<p>GitHub: <a href='https://github.com/konashevich/Smart-Recorder-Transcriber'>https://github.com/konashevich/Smart-Recorder-Transcriber</a></p>"
+            f"<p>License: Open Source (MIT)</p>"
+        )
+        QMessageBox.about(self, "About Smart AI Recorder Transcriber", about_text)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
