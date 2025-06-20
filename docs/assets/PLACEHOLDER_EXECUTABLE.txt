@@ -1,0 +1,1 @@
+Please replace this file with the actual Windows x64 executable for 'Listen & Polish - AI Transcriber'. The executable should ideally be named 'ListenAndPolishAITranscriber.exe' or similar.

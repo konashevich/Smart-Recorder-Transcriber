@@ -1,0 +1,215 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+}
+
+main {
+    max-width: 960px;
+    margin: auto;
+    overflow: auto;
+    padding: 0 20px;
+}
+
+section {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+section h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+/* Hero Section */
+#hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+}
+
+#hero .hero-content {
+    flex: 1;
+    min-width: 300px; /* Ensure content doesn't get too squished */
+}
+
+#hero .hero-content h2 {
+    font-size: 2rem;
+    color: #0056b3; /* A slightly more engaging color */
+}
+
+#hero .hero-content p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.download-button {
+    display: inline-block;
+    background: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background: #0056b3;
+}
+
+.note {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 10px;
+}
+
+#hero .hero-image {
+    flex: 1;
+    text-align: center;
+    min-width: 300px; /* Ensure image container doesn't get too squished */
+}
+
+#hero .hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Features Section */
+#features ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#features ul li {
+    background: #e9ecef;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#features ul li strong {
+    color: #0056b3;
+}
+
+/* Gemini Key Section */
+#gemini-key a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+#gemini-key a:hover {
+    text-decoration: underline;
+}
+
+/* Other Images Section */
+#other-images {
+    text-align: center; /* Center the images */
+}
+
+#other-images img {
+    max-width: 48%; /* Adjust to fit two images side-by-side with some margin */
+    height: auto;
+    margin: 1%; /* Small margin around images */
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    background: #333;
+    color: #fff;
+    border-radius: 8px;
+}
+
+footer p {
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    #hero {
+        flex-direction: column;
+    }
+
+    #hero .hero-content, #hero .hero-image {
+        text-align: center;
+        padding: 0; /* Reset padding for smaller screens if needed */
+    }
+
+    #hero .hero-content h2 {
+        font-size: 1.8rem;
+    }
+
+    #other-images img {
+        max-width: 90%; /* Stack images on smaller screens */
+        margin: 10px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    section {
+        padding: 15px;
+    }
+
+    #hero .hero-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .download-button {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    #features ul li {
+        font-size: 0.9rem;
+    }
+}
